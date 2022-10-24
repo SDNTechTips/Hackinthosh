@@ -1,2 +1,0 @@
-# Hackinthosh
-Hackinthosh
