@@ -1,0 +1,86 @@
+
+If internet is not working on your WSL ubuntu machine
+
+# sudo nano /etc/resolv.conf
+
+nameserver 1.1.1.1
+
+---------------------
+For Creating an installation media, On your wsl ubuntu machine
+
+# sudo git clone https://github.com/thenickdude/OSX-KVM
+
+# sudo apt install qemu-utils make
+
+# cd OSX-KVM
+
+# cd scripts/monterey
+#make Monterey-recovery.img
+
+-------------------
+
+Download opencore file:
+https://github.com/thenickdude/KVM-Opencore/releases
+-------------------
+
+Fetch the OSK authentication key
+
+Creating OSK
+Link: https://github.com/sickcodes/osx-serial-generator
+
+sudo apt update -y
+sudo apt install libguestfs-tools build-essential wget git linux-generic gcc uuid-runtime sudo -y
+
+./generate-unique-machine-values.sh \
+    -c 1 \
+    --model="iMacPro1,1"
+-------------------
+
+Edit /etc/pve/qemu-server/YOUR-VM-ID-HERE.conf (e.g. with nano or vim). 
+Add this line, being sure to substitute the OSK you extracted earlier into the right place:
+
+args: -device isa-applesmc,osk="THE-OSK-YOU-EXTRACTED-GOES-HERE" -smbios type=2 -device usb-kbd,bus=ehci.0,port=2 -global nec-usb-xhci.msi=off -global ICH9-LPC.acpi-pci-hotplug-with-bridge-support=off
+
+------------------
+Add a cpu argument. If your host CPU is Intel, add this to the end of the “args” line:
+
+-cpu host,kvm=on,vendor=GenuineIntel,+kvm_pv_unhalt,+kvm_pv_eoi,+hypervisor,+invtsc
+
+If AMD, add this to the end of the “args” line:
+
+-cpu Penryn,kvm=on,vendor=GenuineIntel,+kvm_pv_unhalt,+kvm_pv_eoi,+hypervisor,+invtsc,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+avx2,+aes,+fma,+fma4,+bmi1,+bmi2,+xsave,+xsaveopt,+rdrand,check
+
+------------------
+
+Now find the lines that define the two “ISOs” (ide0 and ide2), and remove the “,media=cdrom” part from them. Add “,cache=unsafe” in its place. This will treat these as hard disks rather than DVD drives.
+
+Final argument must resemble the below,
+------
+------
+args: -device isa-applesmc,osk="..." -smbios type=2 -device usb-kbd,bus=ehci.0,port=2 -cpu host,kvm=on,vendor=GenuineIntel,+kvm_pv_unhalt,+kvm_pv_eoi,+hypervisor,+invtsc -global nec-usb-xhci.msi=off -global ICH9-LPC.acpi-pci-hotplug-with-bridge-support=off
+agent: 1
+balloon: 0
+bios: ovmf
+boot: order=ide2
+cores: 4
+cpu: Penryn
+efidisk0: vms-ssd-enc:vm-171-disk-1,efitype=4m,size=1M
+ide0: isos:iso/Monterey-full.img,cache=unsafe,size=14G
+ide2: isos:iso/OpenCore-v15.img,cache=unsafe,size=150M
+machine: q35
+memory: 4096
+name: macos-monterey
+net0: virtio=...,bridge=vmbr0,firewall=1
+numa: 1
+ostype: other
+virtio0: vms:vm-171-disk-0,cache=unsafe,discard=on,size=64G
+scsihw: virtio-scsi-pci
+smbios1: uuid=...
+sockets: 1
+vga: vmware
+-----
+-----
+----------------------
+Configure Proxmox:
+
+echo "options kvm ignore_msrs=Y" >> /etc/modprobe.d/kvm.conf && update-initramfs -k all -u
