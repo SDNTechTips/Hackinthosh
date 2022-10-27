@@ -21,25 +21,6 @@ For Creating an installation media, On your wsl ubuntu machine
 
 Download opencore file:
 https://github.com/thenickdude/KVM-Opencore/releases
--------------------
-
-Fetch the OSK authentication key
-
-Creating OSK
-Link: https://github.com/sickcodes/osx-serial-generator
-
-sudo apt update -y
-sudo apt install libguestfs-tools build-essential wget git linux-generic gcc uuid-runtime sudo -y
-
-./generate-unique-machine-values.sh \
-    -c 1 \
-    --model="iMacPro1,1"
--------------------
-
-Edit /etc/pve/qemu-server/YOUR-VM-ID-HERE.conf (e.g. with nano or vim). 
-Add this line, being sure to substitute the OSK you extracted earlier into the right place:
-
-args: -device isa-applesmc,osk="THE-OSK-YOU-EXTRACTED-GOES-HERE" -smbios type=2 -device usb-kbd,bus=ehci.0,port=2 -global nec-usb-xhci.msi=off -global ICH9-LPC.acpi-pci-hotplug-with-bridge-support=off
 
 ------------------
 Add a cpu argument. If your host CPU is Intel, add this to the end of the “args” line:
@@ -84,3 +65,27 @@ vga: vmware
 Configure Proxmox:
 
 echo "options kvm ignore_msrs=Y" >> /etc/modprobe.d/kvm.conf && update-initramfs -k all -u
+
+----------------------
+----------------------
+Other Userfull commands
+----------------------
+----------------------
+
+Fetch the OSK authentication key
+
+Creating OSK
+Link: https://github.com/sickcodes/osx-serial-generator
+
+sudo apt update -y
+sudo apt install libguestfs-tools build-essential wget git linux-generic gcc uuid-runtime sudo -y
+
+./generate-unique-machine-values.sh \
+    -c 1 \
+    --model="iMacPro1,1"
+-------------------
+
+Edit /etc/pve/qemu-server/YOUR-VM-ID-HERE.conf (e.g. with nano or vim). 
+Add this line, being sure to substitute the OSK you extracted earlier into the right place:
+
+args: -device isa-applesmc,osk="THE-OSK-YOU-EXTRACTED-GOES-HERE" -smbios type=2 -device usb-kbd,bus=ehci.0,port=2 -global nec-usb-xhci.msi=off -global ICH9-LPC.acpi-pci-hotplug-with-bridge-support=off
