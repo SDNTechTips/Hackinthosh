@@ -1,5 +1,5 @@
 
-If internet is not working on your WSL ubuntu machine and Disable internet,
+If internet is not working on your WSL ubuntu machine, Disable Antivirus and then do the below modification,
 
 # sudo nano /etc/resolv.conf
 
